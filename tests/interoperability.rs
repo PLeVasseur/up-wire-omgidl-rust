@@ -3,7 +3,7 @@
 use std::io::Cursor;
 
 use up_rust::{DecodePayload, EncodePayload, ReadDecodePayload};
-use up_wire_omg_idl::{OmgIdlWire, VehicleStatusV1};
+use up_wire_omgidl::{OmgIdlWire, VehicleStatusV1};
 
 const INDEPENDENT_XCDR1_LE_HEX: &str = include_str!("fixtures/vehicle_status_v1_xcdr1_le.hex");
 

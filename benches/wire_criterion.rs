@@ -5,14 +5,14 @@ use std::io::Cursor;
 
 use criterion::{criterion_group, criterion_main, Criterion, Throughput};
 use up_rust::{DecodePayload, EncodePayload, ReadDecodePayload};
-use up_wire_omg_idl::{OmgIdlWire, VehicleStatusV1};
+use up_wire_omgidl::{OmgIdlWire, VehicleStatusV1};
 
 fn wire_criterion(c: &mut Criterion) {
     let value = VehicleStatusV1::fixture(7);
     let encoded = <OmgIdlWire as EncodePayload<VehicleStatusV1>>::encode_payload_owned(&value)
         .expect("fixture encode");
 
-    let mut group = c.benchmark_group("omg_idl_xcdr1_le");
+    let mut group = c.benchmark_group("omgidl_xcdr1_le");
     group.throughput(Throughput::Bytes(encoded.len() as u64));
 
     group.bench_function("owned_encode_one_serialization", |b| {

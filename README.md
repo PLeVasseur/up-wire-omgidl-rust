@@ -1,6 +1,6 @@
-# up-wire-omg-idl
+# up-wire-omgidl
 
-`up-wire-omg-idl` is a non-published Rust 1.88 crate implementing a strict
+`up-wire-omgidl` is a non-published Rust 1.88 crate implementing a strict
 OMG Interface Definition Language (IDL) XCDR1 little-endian selected-wire
 payload codec for Eclipse uProtocol.
 It composes with an up-rust encoded transport core through the native-prefix

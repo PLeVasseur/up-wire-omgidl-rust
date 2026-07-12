@@ -8,7 +8,7 @@ use up_rust::wire_implementer_api::{
     UProtocolNativeWire, UWire, WireIdentityRef, NATIVE_PREFIX_METADATA_LAYOUT_ID,
 };
 use up_rust::{DecodePayload, EncodePayload, ReadDecodePayload, UWireError};
-use up_wire_omg_idl::{
+use up_wire_omgidl::{
     OmgIdlWire, VehicleStatusV1, MAX_OMG_IDL_PAYLOAD_LEN, OMG_IDL_PAYLOAD_FAMILY_ID,
     OMG_IDL_WIRE_ID,
 };

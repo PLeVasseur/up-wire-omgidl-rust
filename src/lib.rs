@@ -34,7 +34,7 @@ pub const MAX_OMG_IDL_PAYLOAD_LEN: usize = 16 * 1024 * 1024;
 ///
 /// Compact ID `0xD101` is not a globally registered identity.
 pub const OMG_IDL_WIRE_ID: WireIdentity = WireIdentity::new(
-    "org.eclipse.uprotocol.wire.omg-idl-xcdr1-le.experimental",
+    "org.eclipse.uprotocol.wire.omgidl-xcdr1-le.experimental",
     0xD101,
 );
 
@@ -42,12 +42,12 @@ pub const OMG_IDL_WIRE_ID: WireIdentity = WireIdentity::new(
 ///
 /// Compact ID `0xD102` is not a globally registered identity.
 pub const OMG_IDL_PAYLOAD_FAMILY_ID: WireIdentity = WireIdentity::new(
-    "org.eclipse.uprotocol.payload.omg-idl-xcdr1-le.experimental",
+    "org.eclipse.uprotocol.payload.omgidl-xcdr1-le.experimental",
     0xD102,
 );
 
 /// Payload encoding identifier carried in frame metadata.
-pub const OMG_IDL_ENCODING_ID: &str = "up.omg-idl-xcdr1-le";
+pub const OMG_IDL_ENCODING_ID: &str = "up.omgidl-xcdr1-le";
 
 /// Media type for the strict XCDR1 little-endian payload profile.
 pub const OMG_IDL_CONTENT_TYPE: &str = "application/vnd.omg.dds.xcdr1;endianness=little";
@@ -65,7 +65,7 @@ pub type OmgIdlNativePrefixTransport<TCore> = UNativePrefixWireTransport<TCore, 
 
 /// Wraps an encoded transport core with the OMG IDL native-prefix selected wire.
 #[must_use]
-pub fn with_omg_idl_native_prefix<TCore>(core: TCore) -> OmgIdlNativePrefixTransport<TCore> {
+pub fn with_omgidl_native_prefix<TCore>(core: TCore) -> OmgIdlNativePrefixTransport<TCore> {
     core.into_native_prefix_wire_transport(OmgIdlWire)
 }
 
@@ -78,7 +78,7 @@ impl UWire for OmgIdlWire {
 
 impl PayloadFormat for OmgIdlWire {
     fn name() -> &'static str {
-        "omg-idl-xcdr1-le"
+        "omgidl-xcdr1-le"
     }
 
     fn encoding() -> PayloadEncoding {
