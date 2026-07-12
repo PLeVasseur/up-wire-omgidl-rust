@@ -1,11 +1,11 @@
 [package]
-name = "up-wire-dds-idl"
+name = "up-wire-omg-idl"
 version = "0.1.0"
 edition = "2021"
 rust-version = "1.88"
 publish = false
 license = "Apache-2.0"
-description = "Strict DDS-IDL XCDR1 little-endian selected-wire codec for Eclipse uProtocol"
+description = "Strict OMG IDL XCDR1 little-endian selected-wire codec for Eclipse uProtocol"
 readme = "README.md"
 include = [
     "/benches/**",

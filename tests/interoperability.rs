@@ -3,7 +3,7 @@
 use std::io::Cursor;
 
 use up_rust::{DecodePayload, EncodePayload, ReadDecodePayload};
-use up_wire_dds_idl::{DdsIdlWire, VehicleStatusV1};
+use up_wire_omg_idl::{OmgIdlWire, VehicleStatusV1};
 
 const INDEPENDENT_XCDR1_LE_HEX: &str = include_str!("fixtures/vehicle_status_v1_xcdr1_le.hex");
 
@@ -27,14 +27,14 @@ fn independent_fixture_value() -> VehicleStatusV1 {
 #[test]
 fn independent_normative_fixture_decodes() {
     let bytes = independent_fixture_bytes();
-    let actual = <DdsIdlWire as DecodePayload<'_, VehicleStatusV1>>::decode_payload(&bytes)
+    let actual = <OmgIdlWire as DecodePayload<'_, VehicleStatusV1>>::decode_payload(&bytes)
         .expect("decode independently authored fixture");
     assert_eq!(actual, independent_fixture_value());
 }
 
 #[test]
 fn dust_encoding_matches_independent_normative_fixture() {
-    let encoded = <DdsIdlWire as EncodePayload<VehicleStatusV1>>::encode_payload_owned(
+    let encoded = <OmgIdlWire as EncodePayload<VehicleStatusV1>>::encode_payload_owned(
         &independent_fixture_value(),
     )
     .expect("encode fixture");
@@ -44,7 +44,7 @@ fn dust_encoding_matches_independent_normative_fixture() {
 #[test]
 fn independent_fixture_decodes_from_exact_reader() {
     let bytes = independent_fixture_bytes();
-    let actual = <DdsIdlWire as ReadDecodePayload<VehicleStatusV1>>::decode_payload_from_reader(
+    let actual = <OmgIdlWire as ReadDecodePayload<VehicleStatusV1>>::decode_payload_from_reader(
         Cursor::new(&bytes),
         bytes.len(),
     )

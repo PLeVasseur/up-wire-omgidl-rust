@@ -5,26 +5,26 @@ use std::io::Cursor;
 
 use criterion::{criterion_group, criterion_main, Criterion, Throughput};
 use up_rust::{DecodePayload, EncodePayload, ReadDecodePayload};
-use up_wire_dds_idl::{DdsIdlWire, VehicleStatusV1};
+use up_wire_omg_idl::{OmgIdlWire, VehicleStatusV1};
 
 fn wire_criterion(c: &mut Criterion) {
     let value = VehicleStatusV1::fixture(7);
-    let encoded = <DdsIdlWire as EncodePayload<VehicleStatusV1>>::encode_payload_owned(&value)
+    let encoded = <OmgIdlWire as EncodePayload<VehicleStatusV1>>::encode_payload_owned(&value)
         .expect("fixture encode");
 
-    let mut group = c.benchmark_group("dds_idl_xcdr1_le");
+    let mut group = c.benchmark_group("omg_idl_xcdr1_le");
     group.throughput(Throughput::Bytes(encoded.len() as u64));
 
     group.bench_function("owned_encode_one_serialization", |b| {
         b.iter(|| {
-            <DdsIdlWire as EncodePayload<VehicleStatusV1>>::encode_payload_owned(black_box(&value))
+            <OmgIdlWire as EncodePayload<VehicleStatusV1>>::encode_payload_owned(black_box(&value))
                 .expect("owned encode")
         });
     });
 
     group.bench_function("layout_probe_one_serialization", |b| {
         b.iter(|| {
-            <DdsIdlWire as EncodePayload<VehicleStatusV1>>::payload_layout(black_box(&value))
+            <OmgIdlWire as EncodePayload<VehicleStatusV1>>::payload_layout(black_box(&value))
                 .expect("layout probe")
         });
     });
@@ -32,7 +32,7 @@ fn wire_criterion(c: &mut Criterion) {
     let mut destination = vec![0_u8; encoded.len()];
     group.bench_function("direct_encode_one_serialization_plus_copy", |b| {
         b.iter(|| {
-            <DdsIdlWire as EncodePayload<VehicleStatusV1>>::encode_payload(
+            <OmgIdlWire as EncodePayload<VehicleStatusV1>>::encode_payload(
                 black_box(&value),
                 black_box(&mut destination),
             )
@@ -42,14 +42,14 @@ fn wire_criterion(c: &mut Criterion) {
 
     group.bench_function("contiguous_decode_plus_canonical_reencode", |b| {
         b.iter(|| {
-            <DdsIdlWire as DecodePayload<'_, VehicleStatusV1>>::decode_payload(black_box(&encoded))
+            <OmgIdlWire as DecodePayload<'_, VehicleStatusV1>>::decode_payload(black_box(&encoded))
                 .expect("contiguous decode")
         });
     });
 
     group.bench_function("reader_exact_copy_decode_plus_canonical_reencode", |b| {
         b.iter(|| {
-            <DdsIdlWire as ReadDecodePayload<VehicleStatusV1>>::decode_payload_from_reader(
+            <OmgIdlWire as ReadDecodePayload<VehicleStatusV1>>::decode_payload_from_reader(
                 black_box(Cursor::new(encoded.as_ref())),
                 encoded.len(),
             )

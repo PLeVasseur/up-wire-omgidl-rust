@@ -8,19 +8,19 @@ use up_rust::wire_implementer_api::{
     UProtocolNativeWire, UWire, WireIdentityRef, NATIVE_PREFIX_METADATA_LAYOUT_ID,
 };
 use up_rust::{DecodePayload, EncodePayload, ReadDecodePayload, UWireError};
-use up_wire_dds_idl::{
-    DdsIdlWire, VehicleStatusV1, DDS_IDL_PAYLOAD_FAMILY_ID, DDS_IDL_WIRE_ID,
-    MAX_DDS_IDL_PAYLOAD_LEN,
+use up_wire_omg_idl::{
+    OmgIdlWire, VehicleStatusV1, MAX_OMG_IDL_PAYLOAD_LEN, OMG_IDL_PAYLOAD_FAMILY_ID,
+    OMG_IDL_WIRE_ID,
 };
 
 fn encode(value: &VehicleStatusV1) -> Vec<u8> {
-    <DdsIdlWire as EncodePayload<VehicleStatusV1>>::encode_payload_owned(value)
+    <OmgIdlWire as EncodePayload<VehicleStatusV1>>::encode_payload_owned(value)
         .expect("encode fixture")
         .to_vec()
 }
 
 fn decode(bytes: &[u8]) -> Result<VehicleStatusV1, UWireError> {
-    <DdsIdlWire as DecodePayload<'_, VehicleStatusV1>>::decode_payload(bytes)
+    <OmgIdlWire as DecodePayload<'_, VehicleStatusV1>>::decode_payload(bytes)
 }
 
 fn assert_invalid(result: Result<VehicleStatusV1, UWireError>) {
@@ -31,7 +31,7 @@ fn assert_invalid(result: Result<VehicleStatusV1, UWireError>) {
 fn round_trip_and_layout_are_exact() {
     let value = VehicleStatusV1::fixture(42);
     let bytes = encode(&value);
-    let layout = <DdsIdlWire as EncodePayload<VehicleStatusV1>>::payload_layout(&value)
+    let layout = <OmgIdlWire as EncodePayload<VehicleStatusV1>>::payload_layout(&value)
         .expect("layout probe");
     assert_eq!(layout.len(), bytes.len());
     assert_eq!(layout.align(), 1);
@@ -44,7 +44,7 @@ fn direct_encode_uses_prefix_semantics() {
     let expected = encode(&value);
     let mut short = vec![0_u8; expected.len() - 1];
     assert_eq!(
-        <DdsIdlWire as EncodePayload<VehicleStatusV1>>::encode_payload(&value, &mut short),
+        <OmgIdlWire as EncodePayload<VehicleStatusV1>>::encode_payload(&value, &mut short),
         Err(UWireError::BufferTooSmall {
             expected: expected.len(),
             actual: expected.len() - 1,
@@ -52,7 +52,7 @@ fn direct_encode_uses_prefix_semantics() {
     );
 
     let mut large = vec![0xA5; expected.len() + 5];
-    <DdsIdlWire as EncodePayload<VehicleStatusV1>>::encode_payload(&value, &mut large)
+    <OmgIdlWire as EncodePayload<VehicleStatusV1>>::encode_payload(&value, &mut large)
         .expect("encode into larger destination");
     assert_eq!(&large[..expected.len()], expected.as_slice());
     assert!(large[expected.len()..].iter().all(|byte| *byte == 0xA5));
@@ -62,7 +62,7 @@ fn direct_encode_uses_prefix_semantics() {
 fn exact_reader_rejects_short_and_overlong_sources() {
     let bytes = encode(&VehicleStatusV1::fixture(3));
     assert_invalid(
-        <DdsIdlWire as ReadDecodePayload<VehicleStatusV1>>::decode_payload_from_reader(
+        <OmgIdlWire as ReadDecodePayload<VehicleStatusV1>>::decode_payload_from_reader(
             Cursor::new(&bytes[..bytes.len() - 1]),
             bytes.len(),
         ),
@@ -71,7 +71,7 @@ fn exact_reader_rejects_short_and_overlong_sources() {
     let mut overlong = bytes.clone();
     overlong.push(0xAA);
     assert_invalid(
-        <DdsIdlWire as ReadDecodePayload<VehicleStatusV1>>::decode_payload_from_reader(
+        <OmgIdlWire as ReadDecodePayload<VehicleStatusV1>>::decode_payload_from_reader(
             Cursor::new(overlong),
             bytes.len(),
         ),
@@ -89,16 +89,16 @@ impl Read for PanicReader {
 #[test]
 fn oversized_reader_length_is_rejected_before_read_or_allocation() {
     assert_invalid(
-        <DdsIdlWire as ReadDecodePayload<VehicleStatusV1>>::decode_payload_from_reader(
+        <OmgIdlWire as ReadDecodePayload<VehicleStatusV1>>::decode_payload_from_reader(
             PanicReader,
-            MAX_DDS_IDL_PAYLOAD_LEN + 1,
+            MAX_OMG_IDL_PAYLOAD_LEN + 1,
         ),
     );
 }
 
 #[test]
 fn oversized_contiguous_payload_is_rejected() {
-    let oversized = vec![0_u8; MAX_DDS_IDL_PAYLOAD_LEN + 1];
+    let oversized = vec![0_u8; MAX_OMG_IDL_PAYLOAD_LEN + 1];
     assert_invalid(decode(&oversized));
 }
 
@@ -158,7 +158,7 @@ struct WrongType {
 #[test]
 fn wrong_payload_type_is_rejected() {
     let bytes = encode(&VehicleStatusV1::fixture(11));
-    let result = <DdsIdlWire as DecodePayload<'_, WrongType>>::decode_payload(&bytes);
+    let result = <OmgIdlWire as DecodePayload<'_, WrongType>>::decode_payload(&bytes);
     assert!(matches!(result, Err(UWireError::InvalidPayload(_))));
 }
 
@@ -182,28 +182,28 @@ fn every_truncation_and_a_deterministic_mutation_corpus_is_panic_free() {
 
 #[test]
 fn identities_are_distinct_experimental_values() {
-    assert_ne!(DDS_IDL_WIRE_ID, DDS_IDL_PAYLOAD_FAMILY_ID);
-    for identity in [DDS_IDL_WIRE_ID, DDS_IDL_PAYLOAD_FAMILY_ID] {
+    assert_ne!(OMG_IDL_WIRE_ID, OMG_IDL_PAYLOAD_FAMILY_ID);
+    for identity in [OMG_IDL_WIRE_ID, OMG_IDL_PAYLOAD_FAMILY_ID] {
         assert!((0x8000..=0xFFFE).contains(&identity.compact_id()));
         assert!(identity.literal_id().contains("experimental"));
     }
-    assert_eq!(DdsIdlWire::WIRE_ID, DDS_IDL_WIRE_ID);
-    assert_eq!(DdsIdlWire::PAYLOAD_FAMILY_ID, DDS_IDL_PAYLOAD_FAMILY_ID);
+    assert_eq!(OmgIdlWire::WIRE_ID, OMG_IDL_WIRE_ID);
+    assert_eq!(OmgIdlWire::PAYLOAD_FAMILY_ID, OMG_IDL_PAYLOAD_FAMILY_ID);
     assert_eq!(
-        DdsIdlWire::METADATA_LAYOUT_ID,
+        OmgIdlWire::METADATA_LAYOUT_ID,
         NATIVE_PREFIX_METADATA_LAYOUT_ID
     );
     assert_eq!(
-        DdsIdlWire::FORMAT_VERSION,
+        OmgIdlWire::FORMAT_VERSION,
         UProtocolNativeWire::FORMAT_VERSION
     );
-    assert!(DdsIdlWire::wire_compatibility(&WireIdentityRef::Compact(
-        DDS_IDL_WIRE_ID.compact_id()
+    assert!(OmgIdlWire::wire_compatibility(&WireIdentityRef::Compact(
+        OMG_IDL_WIRE_ID.compact_id()
     ))
     .is_compatible());
-    assert!(!DdsIdlWire::wire_compatibility(&WireIdentityRef::Compact(0xA201)).is_compatible());
+    assert!(!OmgIdlWire::wire_compatibility(&WireIdentityRef::Compact(0xA201)).is_compatible());
     assert!(
-        !DdsIdlWire::payload_family_compatibility(&WireIdentityRef::Compact(0xD103))
+        !OmgIdlWire::payload_family_compatibility(&WireIdentityRef::Compact(0xD103))
             .is_compatible()
     );
 }

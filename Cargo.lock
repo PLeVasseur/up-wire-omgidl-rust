@@ -878,7 +878,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "up-wire-dds-idl"
+name = "up-wire-omg-idl"
 version = "0.1.0"
 dependencies = [
  "bytes",

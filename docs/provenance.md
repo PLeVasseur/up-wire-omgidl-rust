@@ -1,5 +1,11 @@
 # IDL And Fixture Provenance
 
+OMG IDL 4.2 defines language- and platform-independent data types and
+interfaces. DDS-XTypes 1.3 defines the DDS topic type system and XCDR
+serialization used by this implementation. The product is therefore named for
+its application-facing OMG IDL contract; Dust DDS is the Rust implementation
+used to materialize the DDS-XTypes/XCDR1 representation.
+
 ## Normative Type
 
 `idl/vehicle_status_v1.idl` is the normative application type definition. The
@@ -48,6 +54,9 @@ physical DDS transport validation phase.
 
 ## Representation Sources
 
+- OMG IDL 4.2: <https://www.omg.org/spec/IDL/4.2/About-IDL>.
+- OMG DDS-XTypes 1.3: <https://www.omg.org/spec/DDS-XTypes/1.3/About-DDS-XTypes>.
+- OMG DDSI-RTPS 2.5: <https://www.omg.org/spec/DDSI-RTPS/2.5/About-DDSI-RTPS>.
 - OMG DDSI-RTPS 2.5, SerializedPayload and RepresentationIdentifier tables.
 - OMG XTypes 1.3, XCDR version 1 serialization and alignment rules.
 - Dust DDS 0.15.0 `Cdr1LeSerializer` and `CdrDeserializer` implementation.

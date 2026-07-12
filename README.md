@@ -1,13 +1,16 @@
-# up-wire-dds-idl
+# up-wire-omg-idl
 
-`up-wire-dds-idl` is a non-published Rust 1.88 crate implementing a strict
-DDS-IDL XCDR1 little-endian selected-wire payload codec for Eclipse uProtocol.
+`up-wire-omg-idl` is a non-published Rust 1.88 crate implementing a strict
+OMG Interface Definition Language (IDL) XCDR1 little-endian selected-wire
+payload codec for Eclipse uProtocol.
 It composes with an up-rust encoded transport core through the native-prefix
 selected-wire adapter; it is not a physical DDS transport.
 
 ## Payload Contract
 
-The payload is one complete DDS SerializedPayload value, including its
+OMG IDL defines the language-independent application type. OMG DDS-XTypes
+defines the DDS type system and XCDR representation used here. The payload is
+one complete DDS SerializedPayload value, including its
 four-byte encapsulation header. The accepted representations are only XCDR1
 little-endian `CDR_LE` (`0x0001`) and `PL_CDR_LE` (`0x0003`). The options byte,
 terminal padding count, four-byte total alignment, and zero padding are checked.

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-//! Strict DDS-IDL XCDR1 little-endian selected-wire support for Eclipse uProtocol.
+//! Strict OMG IDL XCDR1 little-endian selected-wire support for Eclipse uProtocol.
 //!
 //! Payloads are complete DDS SerializedPayload values: a four-byte encapsulation
 //! header followed by one XCDR1 value and canonical zero padding. Only `CDR_LE`
@@ -27,63 +27,63 @@ use up_rust::{
     UWireError,
 };
 
-/// Maximum accepted or produced DDS-IDL payload size (16 MiB).
-pub const MAX_DDS_IDL_PAYLOAD_LEN: usize = 16 * 1024 * 1024;
+/// Maximum accepted or produced OMG IDL payload size (16 MiB).
+pub const MAX_OMG_IDL_PAYLOAD_LEN: usize = 16 * 1024 * 1024;
 
 /// Provisional local/experimental selected-wire identity.
 ///
 /// Compact ID `0xD101` is not a globally registered identity.
-pub const DDS_IDL_WIRE_ID: WireIdentity = WireIdentity::new(
-    "org.eclipse.uprotocol.wire.dds-idl-xcdr1-le.experimental",
+pub const OMG_IDL_WIRE_ID: WireIdentity = WireIdentity::new(
+    "org.eclipse.uprotocol.wire.omg-idl-xcdr1-le.experimental",
     0xD101,
 );
 
 /// Provisional local/experimental payload-family identity.
 ///
 /// Compact ID `0xD102` is not a globally registered identity.
-pub const DDS_IDL_PAYLOAD_FAMILY_ID: WireIdentity = WireIdentity::new(
-    "org.eclipse.uprotocol.payload.dds-idl-xcdr1-le.experimental",
+pub const OMG_IDL_PAYLOAD_FAMILY_ID: WireIdentity = WireIdentity::new(
+    "org.eclipse.uprotocol.payload.omg-idl-xcdr1-le.experimental",
     0xD102,
 );
 
 /// Payload encoding identifier carried in frame metadata.
-pub const DDS_IDL_ENCODING_ID: &str = "up.dds-idl-xcdr1-le";
+pub const OMG_IDL_ENCODING_ID: &str = "up.omg-idl-xcdr1-le";
 
 /// Media type for the strict XCDR1 little-endian payload profile.
-pub const DDS_IDL_CONTENT_TYPE: &str = "application/vnd.omg.dds.xcdr1;endianness=little";
+pub const OMG_IDL_CONTENT_TYPE: &str = "application/vnd.omg.dds.xcdr1;endianness=little";
 
 const ENCAPSULATION_HEADER_LEN: usize = 4;
 const CDR_LE: [u8; 2] = [0x00, 0x01];
 const PL_CDR_LE: [u8; 2] = [0x00, 0x03];
 
-/// DDS-IDL XCDR1 little-endian selected-wire marker.
+/// OMG IDL XCDR1 little-endian selected-wire marker.
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
-pub struct DdsIdlWire;
+pub struct OmgIdlWire;
 
-/// Native-prefix transport shape for [`DdsIdlWire`].
-pub type DdsIdlNativePrefixTransport<TCore> = UNativePrefixWireTransport<TCore, DdsIdlWire>;
+/// Native-prefix transport shape for [`OmgIdlWire`].
+pub type OmgIdlNativePrefixTransport<TCore> = UNativePrefixWireTransport<TCore, OmgIdlWire>;
 
-/// Wraps an encoded transport core with the DDS-IDL native-prefix selected wire.
+/// Wraps an encoded transport core with the OMG IDL native-prefix selected wire.
 #[must_use]
-pub fn with_dds_idl_native_prefix<TCore>(core: TCore) -> DdsIdlNativePrefixTransport<TCore> {
-    core.into_native_prefix_wire_transport(DdsIdlWire)
+pub fn with_omg_idl_native_prefix<TCore>(core: TCore) -> OmgIdlNativePrefixTransport<TCore> {
+    core.into_native_prefix_wire_transport(OmgIdlWire)
 }
 
-impl UWire for DdsIdlWire {
-    const WIRE_ID: WireIdentity = DDS_IDL_WIRE_ID;
-    const PAYLOAD_FAMILY_ID: WireIdentity = DDS_IDL_PAYLOAD_FAMILY_ID;
+impl UWire for OmgIdlWire {
+    const WIRE_ID: WireIdentity = OMG_IDL_WIRE_ID;
+    const PAYLOAD_FAMILY_ID: WireIdentity = OMG_IDL_PAYLOAD_FAMILY_ID;
     const METADATA_LAYOUT_ID: WireIdentity = NATIVE_PREFIX_METADATA_LAYOUT_ID;
     const FORMAT_VERSION: u16 = UProtocolNativeWire::FORMAT_VERSION;
 }
 
-impl PayloadFormat for DdsIdlWire {
+impl PayloadFormat for OmgIdlWire {
     fn name() -> &'static str {
-        "dds-idl-xcdr1-le"
+        "omg-idl-xcdr1-le"
     }
 
     fn encoding() -> PayloadEncoding {
-        PayloadEncoding::custom(DDS_IDL_ENCODING_ID, DDS_IDL_CONTENT_TYPE)
-            .expect("static DDS-IDL payload encoding is valid")
+        PayloadEncoding::custom(OMG_IDL_ENCODING_ID, OMG_IDL_CONTENT_TYPE)
+            .expect("static OMG IDL payload encoding is valid")
     }
 }
 
@@ -92,20 +92,20 @@ impl PayloadFormat for DdsIdlWire {
 /// Dust DDS consumes values while creating dynamic samples, so encoding clones
 /// the value. The blanket implementation intentionally adds no compatibility
 /// shim for prototype-specific payload traits.
-pub trait DdsIdlPayload: TypeSupport + Clone {}
+pub trait OmgIdlPayload: TypeSupport + Clone {}
 
-impl<T> DdsIdlPayload for T where T: TypeSupport + Clone {}
+impl<T> OmgIdlPayload for T where T: TypeSupport + Clone {}
 
-impl<T> UWirePayload<T> for DdsIdlWire
+impl<T> UWirePayload<T> for OmgIdlWire
 where
-    T: DdsIdlPayload,
+    T: OmgIdlPayload,
 {
     type Codec = Self;
 }
 
-impl<T> EncodePayload<T> for DdsIdlWire
+impl<T> EncodePayload<T> for OmgIdlWire
 where
-    T: DdsIdlPayload,
+    T: OmgIdlPayload,
 {
     fn payload_layout(value: &T) -> Result<PayloadLayout, UWireError> {
         PayloadLayout::new(encode_xcdr1(value)?.len(), 1)
@@ -126,18 +126,18 @@ where
     }
 }
 
-impl<'a, T> DecodePayload<'a, T> for DdsIdlWire
+impl<'a, T> DecodePayload<'a, T> for OmgIdlWire
 where
-    T: DdsIdlPayload,
+    T: OmgIdlPayload,
 {
     fn decode_payload(src: &'a [u8]) -> Result<T, UWireError> {
         decode_xcdr1(src)
     }
 }
 
-impl<T> ReadDecodePayload<T> for DdsIdlWire
+impl<T> ReadDecodePayload<T> for OmgIdlWire
 where
-    T: DdsIdlPayload,
+    T: OmgIdlPayload,
 {
     fn decode_payload_from_reader<R: Read>(
         mut reader: R,
@@ -147,7 +147,7 @@ where
         let mut bytes = vec![0_u8; payload_len];
         reader.read_exact(&mut bytes).map_err(|error| {
             UWireError::invalid_payload(format!(
-                "DDS-IDL payload reader did not yield the declared {payload_len} bytes: {error}"
+                "OMG IDL payload reader did not yield the declared {payload_len} bytes: {error}"
             ))
         })?;
 
@@ -155,22 +155,22 @@ where
         match reader.read(&mut extra) {
             Ok(0) => decode_xcdr1(&bytes),
             Ok(_) => Err(UWireError::invalid_payload(format!(
-                "DDS-IDL payload reader yielded more than the declared {payload_len} bytes"
+                "OMG IDL payload reader yielded more than the declared {payload_len} bytes"
             ))),
             Err(error) => Err(UWireError::invalid_payload(format!(
-                "DDS-IDL payload reader failed while proving exact length: {error}"
+                "OMG IDL payload reader failed while proving exact length: {error}"
             ))),
         }
     }
 }
 
-fn encode_xcdr1<T: DdsIdlPayload>(value: &T) -> Result<Vec<u8>, UWireError> {
+fn encode_xcdr1<T: OmgIdlPayload>(value: &T) -> Result<Vec<u8>, UWireError> {
     let result = catch_unwind(AssertUnwindSafe(|| {
         Cdr1LeSerializer::serialize(&value.clone().create_dynamic_sample())
     }))
-    .map_err(|_| UWireError::serialization_error("DDS-IDL XCDR1-LE encoder panicked"))?;
+    .map_err(|_| UWireError::serialization_error("OMG IDL XCDR1-LE encoder panicked"))?;
     let bytes = result.map_err(|error| {
-        UWireError::serialization_error(format!("DDS-IDL XCDR1-LE encode failed: {error:?}"))
+        UWireError::serialization_error(format!("OMG IDL XCDR1-LE encode failed: {error:?}"))
     })?;
     ensure_payload_limit_for_encode(bytes.len())?;
     validate_encapsulation(&bytes).map_err(|error| {
@@ -181,7 +181,7 @@ fn encode_xcdr1<T: DdsIdlPayload>(value: &T) -> Result<Vec<u8>, UWireError> {
     Ok(bytes)
 }
 
-fn decode_xcdr1<T: DdsIdlPayload>(src: &[u8]) -> Result<T, UWireError> {
+fn decode_xcdr1<T: OmgIdlPayload>(src: &[u8]) -> Result<T, UWireError> {
     ensure_payload_limit(src.len())?;
     validate_encapsulation(src)?;
 
@@ -189,17 +189,17 @@ fn decode_xcdr1<T: DdsIdlPayload>(src: &[u8]) -> Result<T, UWireError> {
         let dynamic = CdrDeserializer::deserialize(T::get_type(), src)?;
         Ok::<T, dust_dds::xtypes::error::XTypesError>(T::create_sample(dynamic))
     }))
-    .map_err(|_| UWireError::invalid_payload("DDS-IDL XCDR1-LE decoder panicked"))?
+    .map_err(|_| UWireError::invalid_payload("OMG IDL XCDR1-LE decoder panicked"))?
     .map_err(|error| {
-        UWireError::invalid_payload(format!("DDS-IDL XCDR1-LE decode failed: {error:?}"))
+        UWireError::invalid_payload(format!("OMG IDL XCDR1-LE decode failed: {error:?}"))
     })?;
 
     let canonical = encode_xcdr1(&value).map_err(|error| {
-        UWireError::invalid_payload(format!("DDS-IDL canonical validation failed: {error}"))
+        UWireError::invalid_payload(format!("OMG IDL canonical validation failed: {error}"))
     })?;
     if canonical != src {
         return Err(UWireError::invalid_payload(
-            "DDS-IDL payload is not the exact canonical XCDR1-LE encoding for its decoded value",
+            "OMG IDL payload is not the exact canonical XCDR1-LE encoding for its decoded value",
         ));
     }
     Ok(value)
@@ -208,73 +208,73 @@ fn decode_xcdr1<T: DdsIdlPayload>(src: &[u8]) -> Result<T, UWireError> {
 fn validate_encapsulation(src: &[u8]) -> Result<(), UWireError> {
     let representation = src
         .get(..2)
-        .ok_or_else(|| UWireError::invalid_payload("DDS-IDL encapsulation header is truncated"))?;
+        .ok_or_else(|| UWireError::invalid_payload("OMG IDL encapsulation header is truncated"))?;
     if representation != CDR_LE && representation != PL_CDR_LE {
         return Err(UWireError::invalid_payload(format!(
-            "DDS-IDL representation {representation:02x?} is not CDR_LE (0x0001) or PL_CDR_LE (0x0003)"
+            "OMG IDL representation {representation:02x?} is not CDR_LE (0x0001) or PL_CDR_LE (0x0003)"
         )));
     }
 
     let options = src.get(2..ENCAPSULATION_HEADER_LEN).ok_or_else(|| {
-        UWireError::invalid_payload("DDS-IDL encapsulation options are truncated")
+        UWireError::invalid_payload("OMG IDL encapsulation options are truncated")
     })?;
     let reserved = options
         .first()
         .copied()
-        .ok_or_else(|| UWireError::invalid_payload("DDS-IDL options byte is missing"))?;
+        .ok_or_else(|| UWireError::invalid_payload("OMG IDL options byte is missing"))?;
     let padding = usize::from(
         options
             .get(1)
             .copied()
-            .ok_or_else(|| UWireError::invalid_payload("DDS-IDL padding byte is missing"))?,
+            .ok_or_else(|| UWireError::invalid_payload("OMG IDL padding byte is missing"))?,
     );
     if reserved != 0 || padding > 3 {
         return Err(UWireError::invalid_payload(format!(
-            "DDS-IDL encapsulation options are invalid: reserved={reserved}, padding={padding}"
+            "OMG IDL encapsulation options are invalid: reserved={reserved}, padding={padding}"
         )));
     }
     if !src.len().is_multiple_of(4) {
         return Err(UWireError::invalid_payload(
-            "DDS-IDL SerializedPayload length is not a multiple of four",
+            "OMG IDL SerializedPayload length is not a multiple of four",
         ));
     }
     let payload_len = src
         .len()
         .checked_sub(ENCAPSULATION_HEADER_LEN)
-        .ok_or_else(|| UWireError::invalid_payload("DDS-IDL payload length underflow"))?;
+        .ok_or_else(|| UWireError::invalid_payload("OMG IDL payload length underflow"))?;
     if padding > payload_len {
         return Err(UWireError::invalid_payload(
-            "DDS-IDL padding exceeds the serialized value length",
+            "OMG IDL padding exceeds the serialized value length",
         ));
     }
     let padding_start = src
         .len()
         .checked_sub(padding)
-        .ok_or_else(|| UWireError::invalid_payload("DDS-IDL padding length underflow"))?;
+        .ok_or_else(|| UWireError::invalid_payload("OMG IDL padding length underflow"))?;
     let padding_bytes = src
         .get(padding_start..)
-        .ok_or_else(|| UWireError::invalid_payload("DDS-IDL padding range is invalid"))?;
+        .ok_or_else(|| UWireError::invalid_payload("OMG IDL padding range is invalid"))?;
     if padding_bytes.iter().any(|byte| *byte != 0) {
         return Err(UWireError::invalid_payload(
-            "DDS-IDL encapsulation padding must contain only zero bytes",
+            "OMG IDL encapsulation padding must contain only zero bytes",
         ));
     }
     Ok(())
 }
 
 fn ensure_payload_limit(len: usize) -> Result<(), UWireError> {
-    if len > MAX_DDS_IDL_PAYLOAD_LEN {
+    if len > MAX_OMG_IDL_PAYLOAD_LEN {
         return Err(UWireError::invalid_payload(format!(
-            "DDS-IDL payload length {len} exceeds the {MAX_DDS_IDL_PAYLOAD_LEN}-byte limit"
+            "OMG IDL payload length {len} exceeds the {MAX_OMG_IDL_PAYLOAD_LEN}-byte limit"
         )));
     }
     Ok(())
 }
 
 fn ensure_payload_limit_for_encode(len: usize) -> Result<(), UWireError> {
-    if len > MAX_DDS_IDL_PAYLOAD_LEN {
+    if len > MAX_OMG_IDL_PAYLOAD_LEN {
         return Err(UWireError::serialization_error(format!(
-            "DDS-IDL encoded payload length {len} exceeds the {MAX_DDS_IDL_PAYLOAD_LEN}-byte limit"
+            "OMG IDL encoded payload length {len} exceeds the {MAX_OMG_IDL_PAYLOAD_LEN}-byte limit"
         )));
     }
     Ok(())
