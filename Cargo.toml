@@ -1,0 +1,36 @@
+[package]
+name = "up-wire-dds-idl"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.88"
+publish = false
+license = "Apache-2.0"
+description = "Strict DDS-IDL XCDR1 little-endian selected-wire codec for Eclipse uProtocol"
+readme = "README.md"
+include = [
+    "/benches/**",
+    "/docs/**",
+    "/idl/**",
+    "/src/**",
+    "/tests/**",
+    "/Cargo.lock",
+    "/Cargo.toml",
+    "/LICENSE",
+    "/NOTICE",
+    "/README.md",
+]
+
+[dependencies]
+bytes = { version = "1.11.1", default-features = false }
+dust_dds = { version = "=0.15.0" }
+up-rust = { version = "=0.10.0-SNAPSHOT", git = "https://github.com/PLeVasseur/up-rust.git", rev = "31ee659aae9588fabfd99678730a8229a0cdc18c", default-features = false, features = ["selected-wire-user-api", "wire-implementer-api"] }
+
+[dev-dependencies]
+criterion = { version = "0.5.1", default-features = false }
+
+[[bench]]
+name = "wire_criterion"
+harness = false
+
+[lints.rust]
+unsafe_code = "forbid"

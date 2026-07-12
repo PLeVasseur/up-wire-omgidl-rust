@@ -1,0 +1,11 @@
+// SPDX-License-Identifier: Apache-2.0
+// Normative application payload definition for the reference mapping.
+
+@final
+struct VehicleStatusV1 {
+    unsigned long long stamp_ns;
+    long speed_mmps;
+    long steering_mdeg;
+    octet gear;
+    boolean park_brake;
+};
