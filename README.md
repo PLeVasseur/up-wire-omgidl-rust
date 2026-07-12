@@ -53,15 +53,15 @@ Criterion reports these operations separately and names those costs explicitly.
 ```text
 cargo +1.88.0 check --locked --all-targets
 cargo +1.88.0 test --locked --all-targets
-cargo fmt --check
-cargo clippy --locked --all-targets -- -D warnings
-cargo test --locked --all-targets
-RUSTDOCFLAGS="-D warnings" cargo doc --locked --no-deps
-cargo test --locked --doc
-cargo check --locked --benches
-cargo bench --locked --no-run
-cargo package --allow-dirty --list
-cargo tree --locked -e features
+cargo +1.95.0 fmt --check
+cargo +1.95.0 clippy --locked --all-targets -- -D warnings
+cargo +1.95.0 test --locked --all-targets
+RUSTDOCFLAGS="-D warnings" cargo +1.95.0 doc --locked --no-deps
+cargo +1.95.0 test --locked --doc
+cargo +1.95.0 check --locked --benches
+cargo +1.95.0 bench --locked --no-run
+cargo +1.95.0 package --allow-dirty --list
+cargo +1.95.0 tree --locked -e features
 cargo deny check advisories licenses bans sources
 ```
 
