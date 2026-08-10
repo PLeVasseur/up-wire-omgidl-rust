@@ -3,7 +3,7 @@
 use std::io::Cursor;
 
 use up_rust::{DecodePayload, EncodePayload, ReadDecodePayload};
-use up_wire_omgidl::{OmgIdlWire, VehicleStatusV1};
+use up_wire_omgidl::{OmgIdlWire, VehicleStatusV1, OMG_IDL_DECODE_LIMIT};
 
 const INDEPENDENT_XCDR1_LE_HEX: &str = include_str!("fixtures/vehicle_status_v1_xcdr1_le.hex");
 
@@ -47,6 +47,7 @@ fn independent_fixture_decodes_from_exact_reader() {
     let actual = <OmgIdlWire as ReadDecodePayload<VehicleStatusV1>>::decode_payload_from_reader(
         Cursor::new(&bytes),
         bytes.len(),
+        OMG_IDL_DECODE_LIMIT,
     )
     .expect("decode exact reader");
     assert_eq!(actual, independent_fixture_value());

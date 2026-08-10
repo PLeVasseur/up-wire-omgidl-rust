@@ -5,7 +5,7 @@ use std::io::Cursor;
 
 use criterion::{criterion_group, criterion_main, Criterion, Throughput};
 use up_rust::{DecodePayload, EncodePayload, ReadDecodePayload};
-use up_wire_omgidl::{OmgIdlWire, VehicleStatusV1};
+use up_wire_omgidl::{OmgIdlWire, VehicleStatusV1, OMG_IDL_DECODE_LIMIT};
 
 fn wire_criterion(c: &mut Criterion) {
     let value = VehicleStatusV1::fixture(7);
@@ -52,6 +52,7 @@ fn wire_criterion(c: &mut Criterion) {
             <OmgIdlWire as ReadDecodePayload<VehicleStatusV1>>::decode_payload_from_reader(
                 black_box(Cursor::new(encoded.as_ref())),
                 encoded.len(),
+                OMG_IDL_DECODE_LIMIT,
             )
             .expect("reader decode")
         });

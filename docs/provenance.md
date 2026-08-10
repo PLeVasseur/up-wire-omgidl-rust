@@ -60,4 +60,4 @@ physical DDS transport validation phase.
 - OMG DDSI-RTPS 2.5, SerializedPayload and RepresentationIdentifier tables.
 - OMG XTypes 1.3, XCDR version 1 serialization and alignment rules.
 - Dust DDS 0.15.0 `Cdr1LeSerializer` and `CdrDeserializer` implementation.
-- up-rust revision `31ee659aae9588fabfd99678730a8229a0cdc18c` selected-wire API.
+- up-rust revision `7a82babfa7f94aed5b7aac1ac81babff20747bf2` selected-wire API.
