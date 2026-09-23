@@ -48,8 +48,9 @@ pub const OMG_IDL_PAYLOAD_FAMILY_ID: WireIdentity = WireIdentity::new(
     0xD102,
 );
 
-/// Registered OMG IDL CDR payload encoding (registry entry 11).
-pub const OMG_IDL_PAYLOAD_ENCODING: PayloadEncoding = PayloadEncoding::from_registry_entry(11);
+/// Deployment-private encoding for this strict XCDR1 little-endian profile.
+/// Peers must agree to reserve this ID for the documented representation.
+pub const OMG_IDL_PAYLOAD_ENCODING: PayloadEncoding = PayloadEncoding::from_registry_entry(0xF003);
 
 const ENCAPSULATION_HEADER_LEN: usize = 4;
 const CDR_LE: [u8; 2] = [0x00, 0x01];

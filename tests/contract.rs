@@ -205,7 +205,7 @@ fn identities_are_distinct_experimental_values() {
     }
     assert_eq!(OmgIdlWire::WIRE_ID, OMG_IDL_WIRE_ID);
     assert_eq!(OmgIdlWire::PAYLOAD_FAMILY_ID, OMG_IDL_PAYLOAD_FAMILY_ID);
-    assert_eq!(OMG_IDL_PAYLOAD_ENCODING.id(), 11);
+    assert_eq!(OMG_IDL_PAYLOAD_ENCODING.id(), 0xF003);
     assert_eq!(OmgIdlWire::encoding(), OMG_IDL_PAYLOAD_ENCODING);
     assert_eq!(
         OmgIdlWire::METADATA_LAYOUT_ID,
