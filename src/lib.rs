@@ -18,17 +18,19 @@ use bytes::Bytes;
 use dust_dds::infrastructure::type_support::TypeSupport;
 use dust_dds::xtypes::deserializer::CdrDeserializer;
 use dust_dds::xtypes::serializer::Cdr1LeSerializer;
-use up_rust::selected_wire_user_api::{UNativePrefixWireTransport, UWithNativePrefixWire};
-use up_rust::wire_implementer_api::{
-    UProtocolNativeWire, UWire, UWirePayload, WireIdentity, NATIVE_PREFIX_METADATA_LAYOUT_ID,
-};
 use up_rust::{
-    DecodePayload, EncodePayload, PayloadEncoding, PayloadFormat, PayloadLayout, ReadDecodePayload,
-    UWireError,
+    DecodePayload, EncodePayload, PayloadCodecIdentity, PayloadDecodeLimit, PayloadEncoding,
+    PayloadLayout, ReadDecodePayload, UNativePrefixWireTransport, UProtocolNativeWire, UWire,
+    UWireError, UWirePayload, UWithNativePrefixWire, WireIdentity,
+    NATIVE_PREFIX_METADATA_LAYOUT_ID,
 };
 
 /// Maximum accepted or produced OMG IDL payload size (16 MiB).
 pub const MAX_OMG_IDL_PAYLOAD_LEN: usize = 16 * 1024 * 1024;
+
+/// Encoded-input policy for OMG IDL reader paths.
+pub const OMG_IDL_DECODE_LIMIT: PayloadDecodeLimit =
+    PayloadDecodeLimit::new(MAX_OMG_IDL_PAYLOAD_LEN);
 
 /// Provisional local/experimental selected-wire identity.
 ///
@@ -46,11 +48,9 @@ pub const OMG_IDL_PAYLOAD_FAMILY_ID: WireIdentity = WireIdentity::new(
     0xD102,
 );
 
-/// Payload encoding identifier carried in frame metadata.
-pub const OMG_IDL_ENCODING_ID: &str = "up.omgidl-xcdr1-le";
-
-/// Media type for the strict XCDR1 little-endian payload profile.
-pub const OMG_IDL_CONTENT_TYPE: &str = "application/vnd.omg.dds.xcdr1;endianness=little";
+/// Deployment-private encoding for this strict XCDR1 little-endian profile.
+/// Peers must agree to reserve this ID for the documented representation.
+pub const OMG_IDL_PAYLOAD_ENCODING: PayloadEncoding = PayloadEncoding::private_use(0xF003);
 
 const ENCAPSULATION_HEADER_LEN: usize = 4;
 const CDR_LE: [u8; 2] = [0x00, 0x01];
@@ -76,14 +76,13 @@ impl UWire for OmgIdlWire {
     const FORMAT_VERSION: u16 = UProtocolNativeWire::FORMAT_VERSION;
 }
 
-impl PayloadFormat for OmgIdlWire {
+impl PayloadCodecIdentity for OmgIdlWire {
     fn name() -> &'static str {
         "omgidl-xcdr1-le"
     }
 
     fn encoding() -> PayloadEncoding {
-        PayloadEncoding::custom(OMG_IDL_ENCODING_ID, OMG_IDL_CONTENT_TYPE)
-            .expect("static OMG IDL payload encoding is valid")
+        OMG_IDL_PAYLOAD_ENCODING
     }
 }
 
@@ -142,7 +141,14 @@ where
     fn decode_payload_from_reader<R: Read>(
         mut reader: R,
         payload_len: usize,
+        limit: PayloadDecodeLimit,
     ) -> Result<T, UWireError> {
+        if payload_len > limit.max_payload_bytes() {
+            return Err(UWireError::invalid_payload(format!(
+                "advertised payload length {payload_len} exceeds configured input limit {}",
+                limit.max_payload_bytes()
+            )));
+        }
         ensure_payload_limit(payload_len)?;
         let mut bytes = vec![0_u8; payload_len];
         reader.read_exact(&mut bytes).map_err(|error| {

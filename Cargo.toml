@@ -23,7 +23,7 @@ include = [
 [dependencies]
 bytes = { version = "1.11.1", default-features = false }
 dust_dds = { version = "=0.15.0" }
-up-rust = { version = "=0.10.0-SNAPSHOT", git = "https://github.com/PLeVasseur/up-rust.git", rev = "31ee659aae9588fabfd99678730a8229a0cdc18c", default-features = false, features = ["selected-wire-user-api", "wire-implementer-api"] }
+up-rust = { version = "=0.10.0-SNAPSHOT", git = "https://github.com/PLeVasseur/up-rust.git", rev = "4c786f83fd03f22ba4e7a4e9af0846ae79ecf852", default-features = false, features = ["selected-wire-user-api", "wire-implementer-api"] }
 
 [dev-dependencies]
 criterion = { version = "0.5.1", default-features = false }

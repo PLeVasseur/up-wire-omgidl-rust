@@ -4,14 +4,16 @@ use std::io::{self, Cursor, Read};
 use std::panic::{catch_unwind, AssertUnwindSafe};
 
 use dust_dds::infrastructure::type_support::DdsType;
-use up_rust::wire_implementer_api::{
-    UProtocolNativeWire, UWire, WireIdentityRef, NATIVE_PREFIX_METADATA_LAYOUT_ID,
+use up_rust::{
+    DecodePayload, EncodePayload, PayloadCodecIdentity, PayloadDecodeLimit, ReadDecodePayload,
+    UProtocolNativeWire, UWire, UWireError, WireIdentityRef, NATIVE_PREFIX_METADATA_LAYOUT_ID,
 };
-use up_rust::{DecodePayload, EncodePayload, ReadDecodePayload, UWireError};
 use up_wire_omgidl::{
-    OmgIdlWire, VehicleStatusV1, MAX_OMG_IDL_PAYLOAD_LEN, OMG_IDL_PAYLOAD_FAMILY_ID,
-    OMG_IDL_WIRE_ID,
+    OmgIdlWire, VehicleStatusV1, MAX_OMG_IDL_PAYLOAD_LEN, OMG_IDL_DECODE_LIMIT,
+    OMG_IDL_PAYLOAD_ENCODING, OMG_IDL_PAYLOAD_FAMILY_ID, OMG_IDL_WIRE_ID,
 };
+
+const TEST_LIMIT_BELOW_ADVERTISED_LEN: PayloadDecodeLimit = PayloadDecodeLimit::new(15);
 
 fn encode(value: &VehicleStatusV1) -> Vec<u8> {
     <OmgIdlWire as EncodePayload<VehicleStatusV1>>::encode_payload_owned(value)
@@ -65,6 +67,7 @@ fn exact_reader_rejects_short_and_overlong_sources() {
         <OmgIdlWire as ReadDecodePayload<VehicleStatusV1>>::decode_payload_from_reader(
             Cursor::new(&bytes[..bytes.len() - 1]),
             bytes.len(),
+            OMG_IDL_DECODE_LIMIT,
         ),
     );
 
@@ -74,6 +77,7 @@ fn exact_reader_rejects_short_and_overlong_sources() {
         <OmgIdlWire as ReadDecodePayload<VehicleStatusV1>>::decode_payload_from_reader(
             Cursor::new(overlong),
             bytes.len(),
+            OMG_IDL_DECODE_LIMIT,
         ),
     );
 }
@@ -92,6 +96,18 @@ fn oversized_reader_length_is_rejected_before_read_or_allocation() {
         <OmgIdlWire as ReadDecodePayload<VehicleStatusV1>>::decode_payload_from_reader(
             PanicReader,
             MAX_OMG_IDL_PAYLOAD_LEN + 1,
+            OMG_IDL_DECODE_LIMIT,
+        ),
+    );
+}
+
+#[test]
+fn configured_reader_limit_is_rejected_before_read_or_allocation() {
+    assert_invalid(
+        <OmgIdlWire as ReadDecodePayload<VehicleStatusV1>>::decode_payload_from_reader(
+            PanicReader,
+            16,
+            TEST_LIMIT_BELOW_ADVERTISED_LEN,
         ),
     );
 }
@@ -189,6 +205,8 @@ fn identities_are_distinct_experimental_values() {
     }
     assert_eq!(OmgIdlWire::WIRE_ID, OMG_IDL_WIRE_ID);
     assert_eq!(OmgIdlWire::PAYLOAD_FAMILY_ID, OMG_IDL_PAYLOAD_FAMILY_ID);
+    assert_eq!(OMG_IDL_PAYLOAD_ENCODING.id(), 0xF003);
+    assert_eq!(OmgIdlWire::encoding(), OMG_IDL_PAYLOAD_ENCODING);
     assert_eq!(
         OmgIdlWire::METADATA_LAYOUT_ID,
         NATIVE_PREFIX_METADATA_LAYOUT_ID

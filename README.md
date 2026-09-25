@@ -39,6 +39,14 @@ up-rust's `0x8000..=0xFFFE` local/experimental range. Their literal IDs also say
 `experimental`. They are provisional and are not globally registered
 interoperability identities.
 
+Selecting `OmgIdlWire` also opts into deployment-private payload encoding `0xF003`
+for the exact XCDR1 contract above. Peers must agree to and reserve that assignment
+across their shared private-ID budget, including native-profile tables. It is not
+a public registry allocation; the earlier proposed public ID 11 is unassigned and
+is no longer emitted. This candidate reserves `0xF001`/`0xF002`/`0xF003` for
+XCDRv2/Arrow/OMG IDL serialized profiles. Native structural tokens are separate
+metadata and are not produced by this serialized payload codec.
+
 ## Encoding Costs
 
 XCDR1 size is dynamic for arbitrary IDL types. `payload_layout` performs one
